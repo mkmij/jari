@@ -1,20 +1,24 @@
 mod commands;
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use clap::Parser;
-use jari::cli::Cli;
+mod cli;
+use cli::{Cli};
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() -> Result<()> {
     let _cli = Cli::parse();
     Ok(())
-    // let args: Vec<String> = args().collect();
-    // for arg in args {
-    //     println!("{arg}");
+//     match cli.command {
+//          => {},
+// }
+    // match cli.command {
+    //     Commands::Init(_init) => todo!(),
+    //     Commands::Task(task) => {
+    //         let TaskArgs { command: _, filter } = task;
+    //         filter.iter().filter(|val| val.is_some())
+    //             .map(|arg| arg.as_ref().unwrap())
+    //             .for_each(|arg| {
+    //                 println!("{} -> {}", arg.0, arg.1);
+    //         });
+    //     }
     // }
-    // println!("{}", handle_help());
-    // match handle_init() {
-    //     Ok(_) => println!("Successfully initialized jari in this project."),
-    //     Err(e) => eprintln!("Error: {e}"),
-    // }
-    // Ok(())
 }
