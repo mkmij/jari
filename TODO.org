@@ -1,0 +1,87 @@
+#+title: JARI TODO
+#+author: mkmij
+
+* Razvojna mapa za jari
+
+** Outline podrzanih komandi:
+
+*** ~jari~ - Pokrece jari tui, interaktivni prompt koji upravlja taskovima i projektima, ukoliko neka podkomanda nije pozvana.
+*** ~init~ - Inicijalizuje jari projekat. Ukoliko dobije argumente direktno izvrsava komandu. Moguci argumenti:
+
++ ~-d, --dir~: putanja do direktorijuma u kom da inicijalizuje projekat; default = cwd
++ ~-n, --name~: ime projekta; default = dir name
++ ~-l, --local~: da li inicijalizovati projekat lokalno ili globalno [[vise informacija]]
+
+*** ~task~ - Upravlja taskovima. Moze primiti podkomande za direktan pristup nekoj opciji ili argumente za brzo menjanje statusa nekog taska. Oba argumenta moraju biti prosledjena. Argumenti:
+
++ ~-t, --title~: ime taska ili [[file:TODO.org][task_id]] za koji zelimo da promenimo status
++ ~-s, --status~: status u koji zelimo da prebacimo task
+
+=Podkomande=:
+
+**** ~new~ - Kreira novi task. Ako se pozove sa argumentima preskace interaktivni proces i direktno izvrsava komandu. Moguci argumenti:
+
++ ~-t, --title~: naziv/naslov novog taska
++ ~-d, --description~: opis novog taska (opciono)
++ ~-s, --status~: status novog taska (opciono, default = prvi status specificiran u globalnom jari konfigu)
+
+**** ~generate~ - Generisanje taskova iz sors fajlova projekta skenirajuci keyworde navedene u konfigu (TODO, FIXME, ...). Moze se pozvati sa argumentom kako bi se preskocio interaktivni proces
+
++ ~-f, --file~: putanja do fajla iz kog zelimo da generisemo taskove
+
+**** ~export~: Eksportuje taskove u neki format. Ako se pozove sa argumentima preskace interaktivni proces i filtraciju, i eksportuje sve taskove iz zadatog projekta u zadatom formatu. Moguci argumenti:
+
++ ~-p, --project-name~: ime projekta iz kog zelimo da eksportujemo taskove
++ ~-f, --format~: format u kom da eksportujemo taskove; default = JSON, moguce vrednosti = [JSON, CSV, SQL]
+
+** Config:
+
++ Globalni konfig bi trebalo da se nalazi u ~$XDG_CONFIG_HOME/.jari/.jari.toml~
++ Lokalni (projektni konfig) bi trebalo da se nalazi u project root folderu, oznacimo ga kao ~$PROJ_ROOT~
++ Cli-ju ce se mozda prosledjivati konfig, i u tom slucaju bi prioritet bio cli-config > lokalni config > globalni config
++ Prilikom pokretanja programa trebalo bi odraditi merge config u obrnutom redosledu kako bi se pravilno overwrite-ovale vrednosti
++ Okviran (grubi) konfig bi izgledao ovako:
+
+  #+BEGIN_SRC toml
+    [project]
+    name = "ime projekta" # mozda da ga formatiram bez razmaka?
+    prefix_style = prefiks za task name, moguce vrednosti ["prefix_num", "prefix", "num", "off"] default "PROJECT_NAME-NUM:"
+    prefix = koji prefiks koristiti ako se koristi za taskove
+    # num je project-wide autoincrement vrednost koja se koristi za prefikse prilikom imenovanja taskova
+    numbering = {start, step} -> odakle da krene i kako da inkrementira NUM, defaults 0, 1
+    status = ["TODO", "IN_PROGRESS", "TESTING", "DONE"], podesivo ofc, pomaze kod autocomplete, mozda se implementira status toggling da ide napred nazad
+    generation_keywords = keywordi koje trazimo da bismo izvukli taskove iz fajlova (default TODO, FIXME)
+    comment_symbols = ["//", ";;", "#", "///"] # simboli kojima pocinju komentari; default = infer iz ekstenzije fajla; ne podrzava multiline comments, moraju biti line by line
+
+    [display]
+    # kontekst u kom se task nalazi prilikom pregleda taska
+    context = {pre, post} koliko linija konteksta prikazati, default npr. {5, 5}
+    empty_lines = da li prikazati prazne linije u kontekstu, true/false
+
+    [exclusions] # ignorovanje foldera/fajlova, ako ima .gitignore onda ignorisi ta mesta, ako nema treba imati sane defaults
+    list = ["list", "of", "paths", "node_modules/"]
+    template = # (mozda imati template za jezike/frejmvorke [spring boot, react, .idea, drugi kurci])
+  #+END_SRC
+  
+** DB
+=TABELE=
+
+*** PROJECT
++ ~id~ - uuid, ili nesto zgodnije, nanouid? varchar
++ ~name~ - ime projekta, varchar
++ ~path~ - apsolutna putanja do project roota, varchar (mozda postoji neki tip za pathove konkretno)
++ ~project_prefix~ - prefiks ako je ukljucen, varchar
++ ~enumerator_value~ - trenutna vrednost enumeratora, koristi se za project prefix ako je ukljuceno
+
+*** TASK
++ ~id~ - uuid, ili nesto zgodnije, nanouid? varchar
++ ~proj_id~ - uuid, ili nesto zgodnije, nanouid? varchar
++ ~title~ - naziv taska, varchar
++ ~path~ - putanja do linije na kojoj se nalazi todo/fixme iz kog je generisano, varchar, /path/to/file
++ ~file_name~ - ime fajla u kome se nalazi task, mozda u formatu FILE_NAME@LINE_NUMBER
++ ~created_at~ - timestamp
++ ~status~ - varchar
++ ~status_change_date~ - timestamp
++ ~context~ -> (par linija pre i posle mesta sa kog je izvucen task, sa sve \n, gde je placeholder za task nesto tipa {} ili <{}>) text
++ ~description~ - varchar/text
+    

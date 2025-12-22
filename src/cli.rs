@@ -14,19 +14,19 @@ pub enum CliCommand {
     ///Initialize a jari project
     #[command(
         long_about = "If invoked with arguments presents a shorthand for initializing a jari project without going through interactive mode",
-        visible_alias = "i"
+        alias = "i"
     )]
     Init(InitArgs),
     ///Manage project tasks
     #[command(
         long_about = "When invoked without subcommands launches an interactive prompt that lists tasks in the current project",
-        visible_alias = "t"
+        alias = "t"
     )]
     Task(TaskArgs),
     ///Export tasks from projects
     #[command(
         long_about = "If args are supplied exports all tasks from the specified project and in the specified format without filtering",
-        visible_alias = "e"
+        alias = "e"
     )]
     Export(ExportArgs),
 }
