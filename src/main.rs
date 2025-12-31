@@ -1,25 +1,27 @@
 mod commands;
 mod config;
+mod db;
 use anyhow::{Ok, Result};
 use clap::Parser;
 mod cli;
-use cli::{Cli};
+use cli::{Cli, CliCommand};
+use log::{info, LevelFilter};
 
 fn main() -> Result<()> {
-    let _cli = Cli::parse();
+    let cli = Cli::parse();
+    init_logging();
+    match cli.command {
+        CliCommand::Init(init_args) => commands::run(CliCommand::Init(init_args)),
+        CliCommand::Task(task_args) => todo!(),
+        CliCommand::Export(export_args) => todo!(),
+    }?;
     Ok(())
-//     match cli.command {
-//          => {},
-// }
-    // match cli.command {
-    //     Commands::Init(_init) => todo!(),
-    //     Commands::Task(task) => {
-    //         let TaskArgs { command: _, filter } = task;
-    //         filter.iter().filter(|val| val.is_some())
-    //             .map(|arg| arg.as_ref().unwrap())
-    //             .for_each(|arg| {
-    //                 println!("{} -> {}", arg.0, arg.1);
-    //         });
-    //     }
-    // }
+}
+
+fn init_logging() {
+    env_logger::Builder::new()
+        .filter_level(LevelFilter::Debug)
+        .default_format()
+        .format_target(false)
+        .init();
 }
